@@ -1,4 +1,4 @@
-package contacts.domain;
+package preserveOther.domain;
 
 public class AddContactsInfo {
 

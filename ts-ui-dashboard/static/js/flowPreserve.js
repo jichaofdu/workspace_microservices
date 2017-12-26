@@ -465,7 +465,15 @@ $("#ticket_select_contacts_confirm_btn").click(function(){
     var selectContactsStatus = false;
     if(radios[radios.length - 1].checked){
         selectContactsStatus = true;
-        preserveCreateNewContacts();
+
+        /********************* For Fault Reproduction **********************/
+        $("#ticket_confirm_contactsId").text("null");
+        $("#ticket_confirm_contactsName").text($("#booking_new_contacts_name").val());
+        $("#ticket_confirm_documentType").text($("#booking_new_contacts_documentType").val());
+        $("#ticket_confirm_documentNumber").text($("#booking_new_contacts_documentNum").val());
+        $("#ticket_confirm_phoneNumber").text($("#booking_new_contacts_phoneNum").val());
+        /*******************************************************************/
+        //preserveCreateNewContacts();
     }else{
         for (var j = 0; j < radios.length - 1; j++) {
             if (radios[j].checked) {
@@ -593,6 +601,28 @@ $("#ticket_confirm_confirm_btn").click(function () {
 
     $("#ticket_confirm_confirm_btn").attr("disabled",true);
     var orderTicketInfo = new Object();
+
+    /********************* For Fault Reproduction **********************/
+    //Contacts
+    if($("#ticket_confirm_contactsId").text() == "null"){
+
+        orderTicketInfo.contactsId = "null";
+        orderTicketInfo.isCreateContacts = "true";
+        orderTicketInfo.contactsName = $("#ticket_confirm_contactsName").text();
+        orderTicketInfo.contactsDocumentType = $("#ticket_confirm_documentType").text();
+        orderTicketInfo.contactsDocumentNumber = $("#ticket_confirm_documentNumber").text();
+        orderTicketInfo.contactsPhoneNumber = $("#ticket_confirm_phoneNumber").text();
+    }else{
+
+        orderTicketInfo.contactsId = $("#ticket_confirm_contactsId").text();
+        orderTicketInfo.isCreateContacts = "false";
+        orderTicketInfo.contactsName = "null";
+        orderTicketInfo.contactsDocumentType = 0;
+        orderTicketInfo.contactsDocumentNumber = "null";
+        orderTicketInfo.contactsPhoneNumber = "null";
+    }
+    /*************************** ***************************************/
+    
     orderTicketInfo.contactsId = $("#ticket_confirm_contactsId").text();
     orderTicketInfo.tripId = $("#ticket_confirm_tripId").text();
     orderTicketInfo.seatType = $("#ticket_confirm_seatType").text();

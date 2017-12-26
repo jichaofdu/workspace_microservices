@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @RestController
-public class FuckContactsController {
+public class ContactsController {
 
     @Autowired
     private ContactsService contactsService;
@@ -115,38 +115,38 @@ public class FuckContactsController {
         }
     }
 
-//    @CrossOrigin(origins = "*")
-//    @RequestMapping(path = "/contacts/delete", method = RequestMethod.DELETE)
-//    public DeleteContactsResult deleteContacts(@RequestBody DeleteContactsInfo dci){
-//        VerifyResult tokenResult = verifySsoLogin(dci.getLoginToken());
-//        if(tokenResult.isStatus() == true){
-//            System.out.println("[ContactsService][VerifyLogin] Success");
-//            return contactsService.delete(UUID.fromString(dci.getContactsId()));
-//        }else{
-//            System.out.println("[ContactsService][VerifyLogin] Fail");
-//            DeleteContactsResult dcr = new DeleteContactsResult();
-//            dcr.setMessage("Not Login");
-//            dcr.setStatus(false);
-//            return dcr;
-//        }
-//    }
-//
-//    @CrossOrigin(origins = "*")
-//    @RequestMapping(path = "/contacts/update", method = RequestMethod.PUT)
-//    public ModifyContactsResult saveContactsInfo(@RequestBody ModifyContactsInfo contactsInfo){
-//        VerifyResult tokenResult = verifySsoLogin(contactsInfo.getLoginToken());
-//        if(tokenResult.isStatus() == true){
-//            System.out.println("[ContactsService][VerifyLogin] Success");
-//            return contactsService.saveChanges(contactsInfo.getContacts());
-//        }else{
-//            System.out.println("[ContactsService][VerifyLogin] Fail");
-//            ModifyContactsResult mcr = new ModifyContactsResult();
-//            mcr.setStatus(false);
-//            mcr.setMessage("Not Login");
-//            mcr.setContacts(null);
-//            return mcr;
-//        }
-//    }
+    /***************** For Fault Reproduction - Error Normal *********************/
+
+    @RequestMapping(path = "/contacts/createWithCheck/{loginId}", method = RequestMethod.POST)
+    public AddContactsResult createContactsWitCheck(@RequestBody AddContactsInfo aci,@PathVariable String loginId){
+        return contactsService.create(aci,loginId);
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(path = "/contacts/createWithoutCheck/{loginId}", method = RequestMethod.POST)
+    public AddContactsResult createContactsWithoutCheck(@RequestBody AddContactsInfo aci,@PathVariable String loginId){
+        Contacts contacts = new Contacts();
+        contacts.setId(UUID.randomUUID());
+        contacts.setAccountId(UUID.fromString(loginId));
+        contacts.setDocumentNumber(aci.getDocumentNumber());
+        contacts.setDocumentType(aci.getDocumentType());
+        contacts.setName(aci.getName());
+        contacts.setPhoneNumber(aci.getPhoneNumber());
+        contactsService.createContacts(contacts);
+        AddContactsResult result = new AddContactsResult();
+        result.setStatus(true);
+        result.setContacts(contacts);
+        result.setMessage("Success");
+        return result;
+    }
+
+    @RequestMapping(path = "/contacts/countContacts/{loginId}", method = RequestMethod.GET)
+    public ArrayList<Contacts> countContactsById(@PathVariable String loginId){
+        System.out.println("[Contacts Service][Count Contacts]");
+        return contactsService.findContactsByAccountId(UUID.fromString(loginId));
+    }
+
+    /**************************************************************************/
 
     private VerifyResult verifySsoLogin(String loginToken){
         System.out.println("[ContactsService][VerifyLogin] Verifying....");

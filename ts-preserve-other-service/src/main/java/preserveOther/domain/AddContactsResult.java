@@ -1,4 +1,4 @@
-package contacts.domain;
+package preserveOther.domain;
 
 public class AddContactsResult {
 
@@ -8,9 +8,7 @@ public class AddContactsResult {
 
     private Contacts contacts;
 
-    /***************** For Fault Reproduction - Error Normal *********************/
     private boolean isExists;
-    /*****************************************************************************/
 
     public AddContactsResult() {
     }

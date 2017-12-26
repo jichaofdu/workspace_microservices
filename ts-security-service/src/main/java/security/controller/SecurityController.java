@@ -52,4 +52,22 @@ public class SecurityController {
         System.out.println("[Security Service][Check Security] Check Account Id:" + info.getAccountId());
         return securityService.check(info);
     }
+
+    /***************** For Fault Reproduction - Error Normal *********************/
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(path = "/security/checkInOneHour", method = RequestMethod.POST)
+    public CheckResult checkInOneHour(@RequestBody CheckInfo info){
+        System.out.println("[Security Service][Check Security In One Hour] Check Account Id:" + info.getAccountId());
+        return securityService.check(info);
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(path = "/security/checkTotalNumber", method = RequestMethod.POST)
+    public CheckResult checkTotalNumber(@RequestBody CheckInfo info){
+        System.out.println("[Security Service][Check Security Total Number] Check Account Id:" + info.getAccountId());
+        return securityService.check(info);
+    }
+
+    /*****************************************************************************/
 }
