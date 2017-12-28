@@ -8,7 +8,6 @@ import inside_payment.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
@@ -91,23 +90,35 @@ public class InsidePaymentServiceImpl implements InsidePaymentService{
                 outsidePaymentInfo.setPrice(result.getOrder().getPrice());
 
 
-                /****这里异步调用第三方支付***/
-                boolean outsidePaySuccess = restTemplate.postForObject(
-                        "http://ts-payment-service:19001/payment/pay", outsidePaymentInfo,Boolean.class);
-//                boolean outsidePaySuccess = false;
-//                try{
-//                    System.out.println("[Payment Service][Turn To Outside Patment] Async Task Begin");
-//                    Future<Boolean> task = asyncTask.sendAsyncCallToPaymentService(outsidePaymentInfo);
-//                    outsidePaySuccess = task.get(2000,TimeUnit.MILLISECONDS).booleanValue();
-//
-//                }catch (Exception e){
-//                    System.out.println("[Inside Payment][Turn to Outside Payment] Time Out.");
-//                    //e.printStackTrace();
-//                    return false;
-//                }
+                /********************* Fault Reproduce - Ts Error External Normal *****************/
+//                boolean outsidePaySuccess = restTemplate.postForObject(
+//                        "http://ts-payment-service:19001/payment/pay", outsidePaymentInfo,Boolean.class);
+                boolean outsidePaySuccess = false;
+                try{
+                    System.out.println("[Payment Service][Turn To Outside Patment] Async Task Begin");
+                    Future<Boolean> task = asyncTask.sendAsyncCallToPaymentService(outsidePaymentInfo);
+                    if(new Random().nextBoolean() == true){
+                        //一半的概率短延时，导致超时。 external固定延迟2秒
+                        outsidePaySuccess = task.get(2000,TimeUnit.MILLISECONDS).booleanValue();
+                    }else{
+                        //一半的概率长延时，使得正常返回
+                        outsidePaySuccess = task.get(6000,TimeUnit.MILLISECONDS).booleanValue();
+                    }
+                }catch (Exception e){
+                    System.out.println("[Inside Payment][Turn to Outside Payment] 外部服务调用超时.");
+                    //e.printStackTrace();
+                    outsidePaySuccess = false;
+                    //return false;
+                }
+
+                if(outsidePaySuccess == false){
+                    throw new RuntimeException("[Error External Normal]");
+                }
 
 
+                System.out.println("[Inside Payment][Turn to Outside Payment] 外部服务调用正常.");
 
+                /*****************************************************************s****************/
 
                 if(outsidePaySuccess){
                     payment.setType(PaymentType.O);

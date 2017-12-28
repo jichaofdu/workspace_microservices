@@ -2,18 +2,14 @@ package inside_payment.async;
 
 import java.util.concurrent.Future;
 import inside_payment.domain.OutsidePaymentInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-
 @Component  
-public class AsyncTask {  
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());  
+public class AsyncTask {
     
     @Autowired
 	private RestTemplate restTemplate;
