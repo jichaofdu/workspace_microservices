@@ -200,17 +200,6 @@ spec:
   selector:
    app: ts-ticket-office-mongo
 
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: ts-voucher-mysql
-spec:
-  ports:
-    - port: 3306
-  selector:
-   app: ts-voucher-mysql
 
 ---
 

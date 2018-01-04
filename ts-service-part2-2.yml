@@ -167,15 +167,3 @@ spec:
   selector:
    app: ts-verification-code-service
 
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: ts-voucher-service
-spec:
-  ports:
-    - port: 16101
-  selector:
-   app: ts-voucher-service
