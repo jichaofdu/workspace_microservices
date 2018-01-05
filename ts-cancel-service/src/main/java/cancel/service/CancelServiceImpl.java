@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class CancelServiceImpl implements CancelService{
@@ -18,8 +19,13 @@ public class CancelServiceImpl implements CancelService{
     @Autowired
     private AsyncTask asyncTask;
 
+    private final AtomicInteger counter = new AtomicInteger();
+
     @Override
     public CancelOrderResult cancelOrder(CancelOrderInfo info,String loginToken,String loginId) throws Exception{
+
+        boolean wrongStatus = false;
+
         GetOrderByIdInfo getFromOrderInfo = new GetOrderByIdInfo();
         getFromOrderInfo.setOrderId(info.getOrderId());
         GetOrderResult orderResult = getOrderByIdFromOrder(getFromOrderInfo);
@@ -33,10 +39,6 @@ public class CancelServiceImpl implements CancelService{
                 ChangeOrderInfo changeOrderInfo = new ChangeOrderInfo();
                 changeOrderInfo.setLoginToken(loginToken);
                 changeOrderInfo.setOrder(order);
-
-
-
-
                 ChangeOrderResult changeOrderResult = cancelFromOrder(changeOrderInfo);
                 if(changeOrderResult.isStatus() == true){
                     CancelOrderResult finalResult = new CancelOrderResult();
@@ -313,6 +315,14 @@ public class CancelServiceImpl implements CancelService{
         }
     }
 
+    public String calculateRefund2(CancelOrderInfo info){
+        GetOrderByIdInfo getFromOrderInfo = new GetOrderByIdInfo();
+        getFromOrderInfo.setOrderId(info.getOrderId());
+        GetOrderResult orderResult = getOrderByIdFromOrderOther(getFromOrderInfo);
+        Order order = orderResult.getOrder();
+        return calculateRefund(order);
+    }
+
     private String calculateRefund(Order order){
         if(order.getStatus() == OrderStatus.NOTPAID.getCode()){
             return "0.00";
@@ -341,12 +351,26 @@ public class CancelServiceImpl implements CancelService{
             System.out.println("[Cancel Order] Ticket expire refund 0");
             return "0";
         }else{
+            /*****************Error bomupdate **********************/
             double totalPrice = Double.parseDouble(order.getPrice());
-            double price = totalPrice * 0.8;
+            double price ;
+
+            int c = counter.incrementAndGet() % 6;
+            if(c ==  1 || c == 2 || c == 3){
+                price = totalPrice * 0.8;
+            }else if(c ==  4 || c == 5){
+                price = totalPrice * 0.8;
+            }else {
+                price = totalPrice * 0.7;
+            }
+
             DecimalFormat priceFormat = new java.text.DecimalFormat("0.00");
             String str = priceFormat.format(price);
+            System.out.println();
             System.out.println("[Cancel Order]calculate refund - " + str);
+            System.out.println();
             return str;
+            /****************************************************/
         }
     }
 
@@ -400,6 +424,15 @@ public class CancelServiceImpl implements CancelService{
                 "http://ts-order-other-service:12032/orderOther/getById/"
                 ,info,GetOrderResult.class);
         return cor;
+    }
+
+    private void checkStatus(boolean wrongStatus) throws Exception{
+        Boolean result = restTemplate.getForObject(
+                "http://ts-inside-payment-service:18673/inside_payment/equal"
+                ,Boolean.class);
+        if(wrongStatus){
+            throw new Exception("status error!!");
+        }
     }
 
 }
